@@ -1,0 +1,6 @@
+data/raw/
+build/
+.DS_Store
+*.sqlite
+Manifest.toml
+.meta*
