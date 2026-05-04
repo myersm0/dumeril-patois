@@ -203,6 +203,14 @@ dumeril-patois/
 
 Several models were evaluated, including local Qwen 2.5-VL 32B and 72B via Ollama, and Claude Opus 4.7. I OCR'd a sample of pages with each, computed token-level diffs between Opus and Qwen, and hand-verified every disagreement against the page scan. Opus was correct in 100% of the dozens of disagreements reviewed. Beyond raw accuracy, Opus also preserves italics, small caps, and Greek script inline — the local LLM's were not able to do this.
 
+### Post-OCR manual quality pass
+
+After the bulk run completed, every page was reviewed for the `⟨?⟩` markers Opus emits where it cannot confidently read a glyph. This surfaced a few minor cropping issues and a few cases of characters that were truly indecipherable in the source images.
+
+This pass helped to confirm transcription discipline: even when the missing character was overwhelmingly inferable from context (e.g. `fra⟨?⟩çais` for *français*), the model left the question mark rather than guessing. Spot-checks of pages adjacent to known crop-failure pages turned up no hallucinations.
+
+Then, where context made the missing character near-certain, I reviewed the source images myself and manually fixed them myself when I could do so with sufficient confidence (e.g. in `ancienn⟨?⟩ signification` the missing letter can safely be assumed to be an 'e'). There were only a few cases where the source image was obscured beyond confident reconstruction, and I let the `⟨?⟩` markers remain in these cases.
+
 ### Strict certain-or-unclassified parsing
 
 The entry parser follows a strict certainty regime borrowed from sibling project [deep-littre](https://github.com/myersm0/deep-littre): rules either match enough structural signal to be definitively right, or the candidate is left `unclassified` for downstream review. There is no confidence axis, no best-guessing. The `unclassified` set is queryable in both the TEI output (`<entry ana="unclassified">`) and SQLite, and serves as the working surface for follow-up — new tightened rules, LLM-assisted review, or manual inspection.
@@ -227,7 +235,6 @@ For structurally hard cases — chiefly quotation/attribution segmentation, wher
 
 - **Stages 4–5 incomplete.** Concatenation library exists; parser, TEI emitter, and SQLite emitter are scaffolded but not implemented.
 - **TEI etymology shape is provisional.** The TEI Lex-0 Etymology chapter is currently a stub in the official spec, leaving the precise modeling of etymons, cognates, and explanatory prose underspecified. The current target uses `<cit type="etymon">` with nested `<form><orth>` based on extrapolation from the Forms and Cross-references chapters; this may need to migrate when Lex-0 publishes the etymology chapter.
-- **Crop verification.** Per-parity crops are hardcoded; a visual sanity sweep across all 222 pages is pending and may surface a small number of pages where text is shaved.
 - **Quotation segmentation.** The hardest structural feature — separating quoted passages from editorial prose with author/work attribution — is expected to land an `unclassified` bucket of nontrivial size at first parse, narrowed iteratively.
 
 ## Source data
