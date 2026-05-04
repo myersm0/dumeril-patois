@@ -1,19 +1,11 @@
 
-struct Pass1Candidate
+Base.@kwdef struct Pass1Candidate
 	headwords::Vector{String}
 	after_bold::String
 	full_paragraph::String
 	page::Int
 	source_line::Int
 end
-
-Pass1Candidate(;
-	headwords,
-	after_bold,
-	full_paragraph,
-	page,
-	source_line,
-) = Pass1Candidate(headwords, after_bold, full_paragraph, page, source_line)
 
 const page_marker_pattern = r"^\[page\s+(\d+)\]\s*$"
 const noise_section_divider = r"^\p{Lu}\s*$"
