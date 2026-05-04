@@ -10,6 +10,7 @@ include("preprocessing.jl")
 include("ocr.jl")
 include("concatenate.jl")
 include("model.jl")
+include("lexical.jl")
 include("discover.jl")
 
 export preprocess_page, ocr_page, concatenate_pages
