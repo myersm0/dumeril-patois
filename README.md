@@ -2,6 +2,8 @@
 
 Structured edition of Édélestand and Alfred Du Méril, ***Dictionnaire du patois normand*** (Caen: B. Mancel, 1849). Page scans from the [Internet Archive](https://archive.org/details/dictionnairedupa00dumuoft); structured output via vision-LLM OCR and a custom parser.
 
+Norman is a Romance language of northwestern France. The Du Méril _Dictionnaire_ records 19th-century rural Norman speech, with etymologies tracing words back to Old French, Latin, Old Norse, and Greek.
+
 > **Status:** work in progress. Check back soon.
 
 ## What this enables
