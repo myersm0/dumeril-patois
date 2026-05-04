@@ -1,11 +1,4 @@
 
-using TOML
-using Unicode
-
-const allowed_gram_fields = (
-	:pos, :gender, :number, :valency, :mood, :tense, :subclass, :register, :function_,
-)
-
 struct Pass1Candidate
 	headwords::Vector{String}
 	after_bold::String
@@ -21,81 +14,6 @@ Pass1Candidate(;
 	page,
 	source_line,
 ) = Pass1Candidate(headwords, after_bold, full_paragraph, page, source_line)
-
-struct ParsedClosedSets
-	parts_of_speech::Dict{String, Vector{PosTag}}
-	locutions::Set{String}
-	citation_locators::Set{String}
-	regions::Dict{String, Vector{String}}
-end
-
-field_symbol(name::AbstractString) = name == "function" ? :function_ : Symbol(name)
-
-function expand_sugar_dict(table::AbstractDict)
-	scalar = Dict{Symbol, String}()
-	array_field = nothing
-	array_values = String[]
-	for (key, value) in table
-		field = field_symbol(key)
-		field in allowed_gram_fields || error("Unknown gram field: $(key)")
-		if value isa AbstractVector
-			array_field === nothing || error("Multiple array fields in sugar form: $(table)")
-			array_field = field
-			array_values = String.(value)
-		else
-			scalar[field] = String(value)
-		end
-	end
-	if array_field === nothing
-		[PosTag(; scalar...)]
-	else
-		[PosTag(; scalar..., array_field => v) for v in array_values]
-	end
-end
-
-function expand_explicit_form(rows::AbstractVector)
-	tags = PosTag[]
-	current = Dict{Symbol, String}()
-	for row in rows
-		field = field_symbol(row["type"])
-		field in allowed_gram_fields || error("Unknown gram field: $(row["type"])")
-		value = String(row["value"])
-		if field == :pos
-			isempty(current) || push!(tags, PosTag(; current...))
-			current = Dict{Symbol, String}(:pos => value)
-		else
-			haskey(current, :pos) || error("Explicit form must lead with pos: $(row)")
-			current[field] = value
-		end
-	end
-	isempty(current) || push!(tags, PosTag(; current...))
-	tags
-end
-
-function pos_tags_from_value(value)
-	if value isa AbstractDict
-		expand_sugar_dict(value)
-	elseif value isa AbstractVector
-		expand_explicit_form(value)
-	else
-		error("Unexpected pos value type: $(typeof(value))")
-	end
-end
-
-function load_closed_sets(path)
-	data = TOML.parsefile(path)
-	parts_of_speech = Dict{String, Vector{PosTag}}()
-	for (surface, value) in get(data, "parts_of_speech", Dict{String, Any}())
-		parts_of_speech[surface] = pos_tags_from_value(value)
-	end
-	locutions = Set{String}(keys(get(data, "locutions", Dict{String, Any}())))
-	citation_locators = Set{String}(keys(get(data, "citation_locators", Dict{String, Any}())))
-	regions = Dict{String, Vector{String}}()
-	for (surface, value) in get(data, "regions", Dict{String, Any}())
-		regions[surface] = value isa AbstractVector ? Vector{String}(value) : String[String(value)]
-	end
-	ParsedClosedSets(parts_of_speech, locutions, citation_locators, regions)
-end
 
 const page_marker_pattern = r"^\[page\s+(\d+)\]\s*$"
 const noise_section_divider = r"^\p{Lu}\s*$"
@@ -135,51 +53,6 @@ function each_paragraph(text::AbstractString)
 	paragraphs
 end
 
-function collect_candidates(text::AbstractString)
-	candidates = Pass1Candidate[]
-	current_page = 0
-	in_errata = false
-
-	for entry in each_paragraph(text)
-		paragraph = entry.text
-
-		page_match = match(page_marker_pattern, paragraph)
-		if page_match !== nothing
-			current_page = parse(Int, page_match.captures[1])
-			continue
-		end
-		if occursin(erratum_marker, paragraph)
-			in_errata = true
-			continue
-		end
-		in_errata && continue
-		is_noise(paragraph) && continue
-
-		headwords, after_bold = consume_bold_group(paragraph)
-		isempty(headwords) && continue
-
-		push!(candidates, Pass1Candidate(
-			headwords = headwords,
-			after_bold = String(after_bold),
-			full_paragraph = paragraph,
-			page = current_page,
-			source_line = entry.source_line,
-		))
-	end
-
-	candidates
-end
-
-function normalize_headword(text::AbstractString)
-	stripped = Unicode.normalize(text, stripmark = true)
-	String(strip(lowercase(stripped)))
-end
-
-function strip_leading_separator(text::AbstractString)
-	separator_match = match(leading_separator, text)
-	separator_match === nothing ? String(text) : String(rest_after(text, separator_match))
-end
-
 function leading_locution_marker(content::AbstractString, locutions::Set{String})
 	for marker in sort(collect(locutions), by = length, rev = true)
 		startswith(content, marker) && return marker
@@ -194,17 +67,6 @@ function strip_french_preposition_tail(text::AbstractString)
 	preposition_match = match(french_preposition_tail, stripped)
 	preposition_match === nothing && return stripped
 	String(strip(rest_after(stripped, preposition_match)))
-end
-
-const standalone_bold_pattern = r"^\*\*([^*]+)\*\*$"
-
-function is_bold_token_paren(content::AbstractString)
-	occursin(standalone_bold_pattern, String(strip(content)))
-end
-
-function bold_token_inner(content::AbstractString)
-	bold_match = match(standalone_bold_pattern, String(strip(content)))
-	bold_match === nothing ? "" : String(bold_match.captures[1])
 end
 
 const region_shape_prefix = r"^(?:arr\.|arrond\.|ar\.|cant\.|Canton|canton|Arr\.|Orne|Manche|Calvados|Eure|Seine-Inférieure|Haute-Normandie)\b"
@@ -434,47 +296,4 @@ function parse_entries(text::AbstractString, closed_sets::ParsedClosedSets)
 	end
 
 	entries
-end
-
-const postag_serializable_fields = (
-	(:gender, "gender"),
-	(:number, "number"),
-	(:valency, "valency"),
-	(:mood, "mood"),
-	(:tense, "tense"),
-	(:subclass, "subclass"),
-	(:register, "register"),
-	(:function_, "function"),
-)
-
-function postag_to_dict(tag::PosTag)
-	result = Dict{String, Any}("pos" => tag.pos)
-	for (field, json_key) in postag_serializable_fields
-		value = getfield(tag, field)
-		value !== nothing && (result[json_key] = value)
-	end
-	result
-end
-
-kind_string(::Standard) = "standard"
-kind_string(::Locution) = "locution"
-kind_string(::Unclassified) = "unclassified"
-
-function entry_to_dict(entry::Entry)
-	Dict{String, Any}(
-		"headword_raw" => entry.headword_raw,
-		"headword_normalized" => entry.headword_normalized,
-		"aliases" => [Dict{String, Any}("raw" => alias.raw, "normalized" => alias.normalized)
-			for alias in entry.aliases],
-		"pos_raw" => entry.pos_raw,
-		"pos_tags" => [postag_to_dict(tag) for tag in entry.pos_tags],
-		"region_raw" => entry.region_raw,
-		"regions" => entry.regions,
-		"headword_qualifier" => entry.headword_qualifier,
-		"body" => entry.body,
-		"page" => entry.page,
-		"source_line" => entry.source_line,
-		"kind" => kind_string(entry.kind),
-		"flags" => [String(flag) for flag in entry.flags],
-	)
 end

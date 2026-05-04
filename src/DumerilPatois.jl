@@ -11,8 +11,10 @@ include("ocr.jl")
 include("concatenate.jl")
 include("model.jl")
 include("lexical.jl")
+include("closed_sets.jl")
 include("parse.jl")
 include("discover.jl")
+include("serialize.jl")
 
 export preprocess_page, ocr_page, concatenate_pages
 export discover_closed_sets, write_discovered_closed_sets
