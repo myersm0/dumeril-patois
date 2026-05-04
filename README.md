@@ -27,9 +27,7 @@ Garbled headword (`Auo` for `Abo`), broken Latin (`lihi` for `tibi`, `calenas` f
 
 **From this pipeline:**
 
-```
-**Abo**, s. m. Morceau de bois que l'on attache au pied des chevaux pour les empêcher de passer d'un champ dans un autre. Saint Jérôme disait déjà : Fac tibi vincula et catenas (sive <gr>κλοιους</gr>, qui hebraice appellantur *Mothoth*, et sermone vulgari *Boias* vocant); *In Hieremiam*, l. V, ch. 27,
-```
+> **Abo**, s. m. Morceau de bois que l'on attache au pied des chevaux pour les empêcher de passer d'un champ dans un autre. Saint Jérôme disait déjà : Fac tibi vincula et catenas (sive <gr>κλοιους</gr>, qui hebraice appellantur *Mothoth*, et sermone vulgari *Boias* vocant); *In Hieremiam*, l. V, ch. 27,
 
 Headword marked as small caps, Latin and Greek correctly transcribed, italics preserved on cited foreign words and work titles, line breaks reflowed.
 
@@ -72,7 +70,7 @@ config/              closed sets (POS, regions, etymology triggers)
 
 ## Design notes
 
-**OCR model selection.** Several models were evaluated, including local Qwen 2.5-VL 32B and 72B via Ollama, and Claude Opus 4.7 via the Anthropic API. We OCR'd a stratified sample of pages with each, computed token-level diffs between Opus and Qwen, and hand-verified every disagreement against the page scan. Opus was correct in 100% of the dozens of disagreements reviewed. Beyond raw accuracy, Opus also preserves italics, small caps, and Greek script inline — features the local models dropped entirely — which collapses what would otherwise be a separate typography-reconstruction pass into the OCR step itself.
+**OCR model selection.** Several models were evaluated, including local Qwen 2.5-VL 32B and 72B via Ollama, and Claude Opus 4.7. I OCR'd a sample of pages with each, computed token-level diffs between Opus and Qwen, and hand-verified every disagreement against the page scan. Opus was correct in 100% of the dozens of disagreements reviewed. Beyond raw accuracy, Opus also preserves italics, small caps, and Greek script inline — the local LLM's were not able to do this.
 
 **Headword normalization.** 19th-century French typography drops diacritics from large-font initial caps because the print can't fit the accent above the larger glyph. The same lemma can therefore appear faithfully in two forms — `EGRIMER` as an entry headword and `Égrimer` in body cross-references — and the OCR is faithful to both. Resolution is via a `headword_normalized` field (lowercase, diacritic-stripped) used for matching at parse time, not by mutating either surface form.
 
