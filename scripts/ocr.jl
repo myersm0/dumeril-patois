@@ -25,7 +25,7 @@ for (i, jp2_path) in enumerate(jp2_files)
 
 	start = time()
 	try
-		text = ocr_page_anthropic(jp2_path; model)
+		text = ocr_page(jp2_path; model)
 		write(output_path, text)
 		elapsed = round(time() - start; digits = 1)
 		println(stderr, "[$i/$total] ok $page_number ($(elapsed)s)")
