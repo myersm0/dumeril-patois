@@ -1,0 +1,197 @@
+# Authoritative closed sets for the entry parser.
+#
+# Schema for [parts_of_speech] and [locutions]:
+#   Sugar form (preferred): inline table { field = value, ... }
+#     Keys are Lex-0 gram types: pos, gender, number, valency, mood, tense, subclass, register, function.
+#     Scalar values emit one <gram type="$key">$value</gram>.
+#     Array values emit one <gram> per element, all with the same type.
+#   Explicit form: list of { type, value } pairs.
+#     Required for multi-pos entries where ordering between pos and attribute grams matters.
+#
+# Surface variants collapse via identical-value rows.
+
+[parts_of_speech]
+
+# nouns
+"s. m."            = { pos = "noun", gender = "masculine" }
+"s. f."            = { pos = "noun", gender = "feminine" }
+"s. m. pl."        = { pos = "noun", gender = "masculine", number = "plural" }
+"s. f. pl."        = { pos = "noun", gender = "feminine", number = "plural" }
+"s."               = { pos = "noun" }
+"s. m. f."         = { pos = "noun", gender = "common" }
+"s. m. et f."      = { pos = "noun", gender = "common" }
+"s. m. p."         = { pos = "noun", gender = "masculine", number = "plural" }
+
+# multi-pos compounds (explicit form)
+"s. m. et interj." = [
+	{ type = "pos",    value = "noun" },
+	{ type = "gender", value = "masculine" },
+	{ type = "pos",    value = "interjection" }
+]
+
+# verbs, simple
+"v."               = { pos = "verb" }
+"v. a."            = { pos = "verb", valency = "active" }
+"v. n."            = { pos = "verb", valency = "neutral" }
+"v. réfl."         = { pos = "verb", valency = "reflexive" }
+"v. réf."          = { pos = "verb", valency = "reflexive" }
+"v. refl."         = { pos = "verb", valency = "reflexive" }
+"v. r."            = { pos = "verb", valency = "reflexive" }
+"v. pr."           = { pos = "verb", valency = "pronominal" }
+"v. imp."          = { pos = "verb", valency = "impersonal" }
+"v. uniper."       = { pos = "verb", valency = "impersonal" }
+"v. imp. déf."     = { pos = "verb", valency = "impersonal", subclass = "défectif" }
+
+# verbs, multi-valency
+"v. a. et n."      = { pos = "verb", valency = ["active", "neutral"] }
+"v. a. et réfl."   = { pos = "verb", valency = ["active", "reflexive"] }
+"v. a. et réf."    = { pos = "verb", valency = ["active", "reflexive"] }
+"v. n. et réfl."   = { pos = "verb", valency = ["neutral", "reflexive"] }
+"v. réfl. et n."   = { pos = "verb", valency = ["reflexive", "neutral"] }
+"v. a. réfl."      = { pos = "verb", valency = ["active", "reflexive"] }
+
+# participles
+"part. pas."       = { pos = "verb", mood = "participle", tense = "past" }
+"part. pass."      = { pos = "verb", mood = "participle", tense = "past" }
+"part. passé."     = { pos = "verb", mood = "participle", tense = "past" }
+"p. pas."          = { pos = "verb", mood = "participle", tense = "past" }
+"p. pass."         = { pos = "verb", mood = "participle", tense = "past" }
+"part. prés."      = { pos = "verb", mood = "participle", tense = "present" }
+
+# adjectives, adverbs
+"adj."             = { pos = "adjective" }
+"adj. f."          = { pos = "adjective", gender = "feminine" }
+"adj. pl."         = { pos = "adjective", number = "plural" }
+"adj. ind."        = { pos = "adjective", subclass = "indéfini" }
+"adv."             = { pos = "adverb" }
+"ad."              = { pos = "adjective" }
+
+# closed-class
+"prép."            = { pos = "preposition" }
+"conj."            = { pos = "conjunction" }
+"interj."          = { pos = "interjection" }
+"int."             = { pos = "interjection" }
+"excl."            = { pos = "interjection" }
+"pr."              = { pos = "pronoun" }
+
+# specialized (grep-confirmed)
+"pron. part."      = { pos = "pronoun", subclass = "partitif" }
+"part. int."       = { pos = "particle", subclass = "interrogative" }
+
+[locutions]
+# Locution markers. Parser sets entry.kind = Locution.
+# function/register fields are scratch metadata for SQLite; TEI emitter handles
+# these as nested <entry type="relatedEntry"> per Lex-0 structural promotion.
+"loc."             = {}
+"loc. adv."        = { function = "adverbial" }
+"locut. adv."      = { function = "adverbial" }
+"expr. adv."       = { function = "adverbial" }
+"loc. pop."        = { register = "popular" }
+
+[citation_locators]
+# Citation locator tokens that bleed into the POS slot of bold-leading
+# citation paragraphs (e.g., "**Benois**, l. II, v. 25890.").
+# Parser uses this set for active citation rejection: any paragraph whose
+# POS-slot matches one of these is demoted to body of previous entry.
+# Grow this set as further locators are surfaced during parser development.
+"l."               = "livre"
+"fabl."            = "fable_locator"
+
+[regions]
+# Singleton: value is a string (canonical ID).
+# Compound:  value is a list of canonical IDs.
+# The bare-paren-locution shape "( loc. de l'arr. de Valognes)" is parser-handled:
+# kind = Locution + region stripped to atomic form.
+
+# arrondissements (Lower Normandy)
+"arr. de Bayeux"          = "arrondissement_de_bayeux"
+"arrond. de Bayeux"       = "arrondissement_de_bayeux"
+"arr de Bayeux"           = "arrondissement_de_bayeux"
+"arr. Bayeux"             = "arrondissement_de_bayeux"
+"arr. de Valognes"        = "arrondissement_de_valognes"
+"arr de Valognes"         = "arrondissement_de_valognes"
+"arr. de Cherbourg"       = "arrondissement_de_cherbourg"
+"arrond. de Cherbourg"    = "arrondissement_de_cherbourg"
+"arr de Cherbourg"        = "arrondissement_de_cherbourg"
+"arr. de Mortain"         = "arrondissement_de_mortain"
+"Arr. de Mortain"         = "arrondissement_de_mortain"
+"arr. de Caen"            = "arrondissement_de_caen"
+"arr. de Coutances"       = "arrondissement_de_coutances"
+"arr. de Vire"            = "arrondissement_de_vire"
+"arr de Vire"             = "arrondissement_de_vire"
+"Arr. de Vire"            = "arrondissement_de_vire"
+"arrond. de Vire"         = "arrondissement_de_vire"
+"ar. de Vire"             = "arrondissement_de_vire"
+"arr. de Saint-Lo"        = "arrondissement_de_saint_lo"
+"arr. de St-Lo"           = "arrondissement_de_saint_lo"
+"arr. d'Avranches"        = "arrondissement_d_avranches"
+"arr. de Lisieux"         = "arrondissement_de_lisieux"
+"arr. de Pont-l'Evêque"   = "arrondissement_de_pont_l_eveque"
+"arr. de Pont-l'Évêque"   = "arrondissement_de_pont_l_eveque"
+"arr. de Pontlévêque"     = "arrondissement_de_pont_l_eveque"
+"arr. de Pont-Audemer"    = "arrondissement_de_pont_audemer"
+"arr. de Rouen"           = "arrondissement_de_rouen"
+"arrond. de Rouen"        = "arrondissement_de_rouen"
+"arr. de Mortagne"        = "arrondissement_de_mortagne"
+"arr de Mortagne"         = "arrondissement_de_mortagne"
+"arr. de Mortagnes"       = "arrondissement_de_mortagne"
+"arr. d'Alençon"          = "arrondissement_d_alencon"
+"arr. d'Argentan"         = "arrondissement_d_argentan"
+"arr. de Falaise"         = "arrondissement_de_falaise"
+
+# départements / larger regions
+"Orne"                    = "orne"
+"Manche"                  = "manche"
+"Calvados"                = "calvados"
+"Eure"                    = "eure"
+"Seine-Inférieure"        = "seine_inferieure"
+"Haute-Normandie"         = "haute_normandie"
+
+# cantons / smaller localities
+"canton des Pieux"        = "canton_des_pieux"
+"cant. des Pieux"         = "canton_des_pieux"
+"Canton de Marigny"       = "canton_de_marigny"
+
+# compound regions (parser splits on et|, but trusts these surface forms only)
+"arr. de Bayeux et de Valognes"     = ["arrondissement_de_bayeux", "arrondissement_de_valognes"]
+"arr. de Valognes et de Caen"       = ["arrondissement_de_valognes", "arrondissement_de_caen"]
+"arr. de Bayeux et de Mortagne"     = ["arrondissement_de_bayeux", "arrondissement_de_mortagne"]
+"arr. de Bayeux et de Saint-Lo"     = ["arrondissement_de_bayeux", "arrondissement_de_saint_lo"]
+"arr. de Bayeux et de Vire"         = ["arrondissement_de_bayeux", "arrondissement_de_vire"]
+"arr. de Bayeux et Orne"            = ["arrondissement_de_bayeux", "orne"]
+"arr. de Cherbourg et de Coutances" = ["arrondissement_de_cherbourg", "arrondissement_de_coutances"]
+"arr. de Vire et de Bayeux"         = ["arrondissement_de_vire", "arrondissement_de_bayeux"]
+"arr. de Vire et d'Argentan"        = ["arrondissement_de_vire", "arrondissement_d_argentan"]
+"arr. de Mortagne et de Bayeux"     = ["arrondissement_de_mortagne", "arrondissement_de_bayeux"]
+"arr. d'Argentan et de Mortagne"    = ["arrondissement_d_argentan", "arrondissement_de_mortagne"]
+"Orne, et arr. de Falaise"          = ["orne", "arrondissement_de_falaise"]
+"Orne et arr. de Vire"              = ["orne", "arrondissement_de_vire"]
+"Orne et arr de Valognes"           = ["orne", "arrondissement_de_valognes"]
+"Orne et Calvados"                  = ["orne", "calvados"]
+"Calvados et Orne"                  = ["calvados", "orne"]
+"Manche et Calvados"                = ["manche", "calvados"]
+"Seine-Inférieure et Calvados"      = ["seine_inferieure", "calvados"]
+
+# Discovered surface forms NOT included as regions (treated as headword qualifiers):
+#   "à" (5), "de" (5), "en" (4), "a" (4), "tout" (3), "par ma", "donner un",
+#   "Bête", "**Chapeleuse**", "de l'eau", "c'est", "de Couanettes", "Noix de",
+#   "poire", "que", "par les", "d'", "donner dans le", "de mouton", "d'ivraie",
+#   "être à sa", "être en", "Il", "par", "jeter à la", "s'en", "œuf", "faire",
+#   "enfant de la"
+# Parser rule: paren-after-bold whose content is not in [regions] → headword_qualifier.
+
+[etymology_languages]
+# Out of scope for E, kept verbatim from existing config for F1.
+"de l'islandais"      = "old_norse"
+"du vieil-allemand"   = "old_high_german"
+"du breton"           = "breton"
+"du saxon"            = "old_english"
+"de l'anglo-saxon"    = "old_english"
+"de l'allemand"       = "german"
+"de l'anglais"        = "english"
+"du gothique"         = "gothic"
+"du latin"            = "latin"
+"du gallique"         = "gaulish"
+"de l'italien"        = "italian"
+"du provençal"        = "provencal"
+"du celtique"         = "celtic"
