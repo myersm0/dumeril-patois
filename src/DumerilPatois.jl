@@ -8,11 +8,7 @@ using Base64
 
 include("preprocessing.jl")
 include("ocr.jl")
-include("ocr_anthropic.jl")
-#include("ocr_cleanup.jl")
-#include("entry_parser.jl")
-#include("intro_parser.jl")
 
-export preprocess_page, ocr_page, ocr_page_anthropic
+export preprocess_page, ocr_page
 
 end

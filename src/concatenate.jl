@@ -1,4 +1,3 @@
-using DumerilPatois
 
 function classify_line(line)
 	stripped = strip(replace(line, "**" => ""))
@@ -160,7 +159,4 @@ function concatenate_pages(input_dir, intro_path, dictionary_path; dictionary_st
 
 	signatures_log
 end
-
-log = concatenate_pages("data/raw/ocr/opus", "build/intro.md", "build/dictionary.md")
-foreach(entry -> println(stderr, "page $(entry.first): ", join(entry.second, ", ")), log)
 

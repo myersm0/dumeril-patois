@@ -1,8 +1,8 @@
 using HTTP, JSON3, Base64
 
 const anthropic_url = "https://api.anthropic.com/v1/messages"
-const default_anthropic_model = "claude-opus-4-7"
-const ocr_prompt_anthropic = ocr_prompt * """
+const default_model = "claude-opus-4-7"
+const ocr_prompt = ocr_prompt * """
 
 TYPOGRAPHY MARKERS — examine the letterforms carefully:
 - SMALL CAPS → wrap in **WORD**. Headwords at the start of each dictionary entry are printed in small caps and must be marked.
@@ -10,7 +10,7 @@ TYPOGRAPHY MARKERS — examine the letterforms carefully:
 - GREEK → wrap in <gr>...</gr>
 """
 
-function ocr_page_anthropic(jp2_path::String; model::String = default_anthropic_model)
+function ocr_page(jp2_path::String; model::String = default_model)
 	png_path = preprocess_page(jp2_path)
 	resized_path = tempname() * ".png"
 	run(pipeline(`sips -Z 2000 $png_path --out $resized_path`, stdout = devnull))
@@ -23,7 +23,7 @@ function ocr_page_anthropic(jp2_path::String; model::String = default_anthropic_
 			role = "user",
 			content = [
 				(type = "image", source = (type = "base64", media_type = "image/png", data = image_base64)),
-				(type = "text", text = ocr_prompt_anthropic),
+				(type = "text", text = ocr_prompt),
 			],
 		)],
 	))
