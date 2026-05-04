@@ -2,7 +2,7 @@ using DumerilPatois
 
 const jp2_dir = "data/raw/jp2"
 const output_dir = "data/raw/ocr/opus"
-const start_page = 109
+const start_page = 1
 const model = "claude-opus-4-7"
 
 mkpath(output_dir)
