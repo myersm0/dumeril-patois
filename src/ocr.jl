@@ -2,7 +2,17 @@ using HTTP, JSON3, Base64
 
 const anthropic_url = "https://api.anthropic.com/v1/messages"
 const default_model = "claude-opus-4-7"
-const ocr_prompt = ocr_prompt * """
+const ocr_prompt = 
+"""
+Transcribe this page verbatim.
+
+REFLOW: Do not preserve line breaks that exist only because the original text wrapped at page width. Join wrapped lines into continuous text. Insert line breaks ONLY at semantic boundaries: paragraph breaks, new dictionary entries, verse lines, footnote starts.
+
+PRESERVE EVERYTHING ELSE EXACTLY: spellings, archaic forms, diacritics, mixed scripts (Greek, Old Norse þ ð æ, Latin). Do not normalize, modernize, or correct.
+
+ILLEGIBLE: single character → ⟨?⟩; whole word → ⟨???⟩. Do not guess.
+
+Output only the transcription. No commentary, no preamble.
 
 TYPOGRAPHY MARKERS — examine the letterforms carefully:
 - SMALL CAPS → wrap in **WORD**. Headwords at the start of each dictionary entry are printed in small caps and must be marked.

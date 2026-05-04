@@ -8,8 +8,9 @@ using Base64
 
 include("preprocessing.jl")
 include("ocr.jl")
+include("concatenate.jl")
 include("model.jl")
 
-export preprocess_page, ocr_page
+export preprocess_page, ocr_page, concatenate_pages
 
 end
