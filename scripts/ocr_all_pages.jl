@@ -1,8 +1,9 @@
 using DumerilPatois
 
 const jp2_dir = "data/raw/jp2"
-const output_dir = "data/raw/ocr"
-const start_page = 109
+const output_dir = "data/raw/ocr/opus"
+const start_page = 1
+const model = "claude-opus-4-7"
 
 mkpath(output_dir)
 
@@ -24,7 +25,7 @@ for (i, jp2_path) in enumerate(jp2_files)
 
 	start = time()
 	try
-		text = ocr_page(jp2_path)
+		text = ocr_page_anthropic(jp2_path; model)
 		write(output_path, text)
 		elapsed = round(time() - start; digits = 1)
 		println(stderr, "[$i/$total] ok $page_number ($(elapsed)s)")
