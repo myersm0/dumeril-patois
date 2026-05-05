@@ -1,12 +1,13 @@
 # Authoritative closed sets for the entry parser.
 #
 # Schema for [parts_of_speech] and [locutions]:
-#   Sugar form (preferred): inline table { field = value, ... }
+#   Inline table: { field = value, ... }
 #     Keys are Lex-0 gram types: pos, gender, number, valency, mood, tense, subclass, register, function.
-#     Scalar values emit one <gram type="$key">$value</gram>.
-#     Array values emit one <gram> per element, all with the same type.
-#   Explicit form: list of { type, value } pairs.
-#     Required for multi-pos entries where ordering between pos and attribute grams matters.
+#     Scalar value emits one <gram type="$key">$value</gram>.
+#     Array value emits one PosTag per element, all sharing the other fields.
+#   Array of inline tables: [{...}, {...}]
+#     Each inline table emits one or more PosTags as above. Use this form for
+#     multi-pos entries where each pos may carry distinct attributes.
 #
 # Surface variants collapse via identical-value rows.
 
@@ -22,11 +23,10 @@
 "s. m. et f."      = { pos = "noun", gender = "common" }
 "s. m. p."         = { pos = "noun", gender = "masculine", number = "plural" }
 
-# multi-pos compounds (explicit form)
+# multi-pos compounds (array of tables)
 "s. m. et interj." = [
-	{ type = "pos",    value = "noun" },
-	{ type = "gender", value = "masculine" },
-	{ type = "pos",    value = "interjection" }
+	{ pos = "noun", gender = "masculine" },
+	{ pos = "interjection" }
 ]
 
 # verbs, simple

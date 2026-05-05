@@ -36,30 +36,11 @@ function expand_sugar_dict(table::AbstractDict)
 	end
 end
 
-function expand_explicit_form(rows::AbstractVector)
-	tags = PosTag[]
-	current = Dict{Symbol, String}()
-	for row in rows
-		field = field_symbol(row["type"])
-		field in allowed_gram_fields || error("Unknown gram field: $(row["type"])")
-		value = String(row["value"])
-		if field == :pos
-			isempty(current) || push!(tags, PosTag(; current...))
-			current = Dict{Symbol, String}(:pos => value)
-		else
-			haskey(current, :pos) || error("Explicit form must lead with pos: $(row)")
-			current[field] = value
-		end
-	end
-	isempty(current) || push!(tags, PosTag(; current...))
-	tags
-end
-
 function pos_tags_from_value(value)
 	if value isa AbstractDict
 		expand_sugar_dict(value)
 	elseif value isa AbstractVector
-		expand_explicit_form(value)
+		[tag for table in value for tag in expand_sugar_dict(table)]
 	else
 		error("Unexpected pos value type: $(typeof(value))")
 	end
