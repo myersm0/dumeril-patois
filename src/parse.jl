@@ -1,4 +1,3 @@
-
 Base.@kwdef struct Pass1Candidate
 	headwords::Vector{String}
 	after_bold::String
@@ -243,7 +242,6 @@ function parse_entries(text::AbstractString, closed_sets::ParsedClosedSets)
 		page_match = match(page_marker_pattern, paragraph)
 		if page_match !== nothing
 			current_page = parse(Int, page_match.captures[1])
-			current_entry !== nothing && push!(body_paragraphs, paragraph)
 			continue
 		end
 		if occursin(erratum_marker, paragraph)
