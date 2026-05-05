@@ -181,17 +181,83 @@
 # Parser rule: paren-after-bold whose content is not in [regions] → headword_qualifier.
 
 [etymology_languages]
-# Out of scope for E, kept verbatim from existing config for F1.
-"de l'islandais"      = "old_norse"
-"du vieil-allemand"   = "old_high_german"
-"du breton"           = "breton"
-"du saxon"            = "old_english"
-"de l'anglo-saxon"    = "old_english"
-"de l'allemand"       = "german"
-"de l'anglais"        = "english"
-"du gothique"         = "gothic"
-"du latin"            = "latin"
-"du gallique"         = "gaulish"
-"de l'italien"        = "italian"
-"du provençal"        = "provencal"
-"du celtique"         = "celtic"
+# Latin
+"du latin"           = "latin"
+"en latin"           = "latin"
+"du vieux-latin"     = "latin"
+"du bas-latin"       = "bas_latin"
+"en bas-latin"       = "bas_latin"
+"en basse-latinité"  = "bas_latin"
+
+# French
+"du vieux-français"  = "old_french"
+"en vieux-français"  = "old_french"
+"du français"        = "french"
+"en français"        = "french"
+
+# Greek
+"du grec"            = "greek"
+
+# Romance
+"du provençal"       = "provencal"
+"en provençal"       = "provencal"
+"en vieux-provençal" = "provencal"
+"de l'italien"       = "italian"
+"en italien"         = "italian"
+"de l'espagnol"      = "spanish"
+"en espagnol"        = "spanish"
+"en portugais"       = "portuguese"
+"en catalan"         = "catalan"
+"en roumansch"       = "romansh"
+"en rumonche"        = "romansh"
+"en languedocien"    = "languedocian"
+
+# Germanic
+"de l'allemand"      = "german"
+"en allemand"        = "german"
+"du vieil-allemand"  = "old_high_german"
+"en vieil-allemand"  = "old_high_german"
+"du bas-allemand"    = "low_german"
+"de l'anglais"       = "english"
+"en anglais"         = "english"
+"du vieil-anglais"   = "old_english"
+"en vieil-anglais"   = "old_english"
+"du saxon"           = "old_english"
+"en saxon"           = "old_english"
+"de l'anglo-saxon"   = "old_english"
+"en anglo-saxon"     = "old_english"
+"en hollandais"      = "dutch"
+"en flamand"         = "flemish"
+"du gothique"        = "gothic"
+"en gothique"        = "gothic"
+"du francisque"      = "frankish"
+
+# Norse
+"de l'islandais"     = "old_norse"
+"en islandais"       = "old_norse"
+"du norse"           = "old_norse"
+"en vieil-islandais" = "old_norse"
+
+# Celtic
+"du breton"          = "breton"
+"en breton"          = "breton"
+"du bas-breton"      = "breton"
+"du celtique"        = "celtic"
+"en celtique"        = "celtic"
+"du gallique"        = "gaulish"
+"en gallique"        = "gaulish"
+"en irlandais"       = "irish"
+"en erse"            = "irish"
+"en gaël"            = "gaelic"
+
+# Other
+"en basque"          = "basque"
+"de l'arabe"         = "arabic"
+"de l'hébreux"       = "hebrew"
+
+[etymology_hedges]
+allowed = ["peut-être", "plutôt", "probablement", "sans doute", "vraisemblablement", "apparemment"]
+
+[cross_reference_shapes]
+allowed = ["voy_bold", "voy_variant"]
+
