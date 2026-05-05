@@ -70,3 +70,35 @@ function write_discovered_closed_sets(path, pos_counts, region_counts)
 		end
 	end
 end
+
+const etymology_candidate_pattern = r"(?<prep>de l'|du |de la |de |en )(?<lang>[\p{L}\-]+)\s+(?:\*[^*]+\*|<gr>[^<]+</gr>)"
+
+function strip_page_markers(text::AbstractString)
+	replace(text, r"\s*\[page\s+\d+\]\s*" => " ")
+end
+
+function discover_etymology_languages(entries_jsonl_path)
+	counts = Dict{String, Int}()
+	for line in eachline(entries_jsonl_path)
+		entry = JSON3.read(line)
+		scan_text = strip_page_markers(entry.body)
+		for hit in eachmatch(etymology_candidate_pattern, scan_text)
+			surface = hit["prep"] * hit["lang"]
+			counts[surface] = get(counts, surface, 0) + 1
+		end
+	end
+	counts
+end
+
+function write_discovered_etymology_languages(path, counts)
+	open(path, "w") do io
+		println(io, "# Discovered etymology language surface forms from build/entries.jsonl.")
+		println(io, "# Inline comments show occurrence counts (sorted descending).")
+		println(io, "# Review and merge into [etymology_languages] in config/closed_sets.toml.")
+		println(io)
+		println(io, "[etymology_languages]")
+		for (form, count) in sort(collect(counts); by = last, rev = true)
+			println(io, "$(toml_quote(form)) = \"\"  # $(count)")
+		end
+	end
+end

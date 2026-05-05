@@ -17,7 +17,8 @@ include("discover.jl")
 include("serialize.jl")
 
 export preprocess_page, ocr_page, concatenate_pages
-export discover_closed_sets, write_discovered_closed_sets
+export discover_closed_sets, write_discovered_closed_sets,
+	discover_etymology_languages, write_discovered_etymology_languages
 export parse_entries, load_closed_sets, entry_to_dict
 export Entry, Alias, PosTag, EntryKind, Standard, Locution, Unclassified
 
