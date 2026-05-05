@@ -142,6 +142,8 @@ If you cannot identify a field with structural certainty, return `null` for that
 - **Direct shape**: `(de l'|du |en )<lang> *<etymon>*` — e.g. `du latin *Pastor*`, `de l'islandais *Beita*`.
 - **Inverse shape**: `*<form>* signifiait en <lang> *<etymon>*` — e.g. `*Virer* signifiait en vieux-français Lancer, Jeter`. Note: the form on the left is what Du Méril is glossing (often the headword or a related French word); the etymon is on the right.
 - **Greek shape**: `du grec <gr>...</gr>` — set `language: "greek"` reliably.
+- **Chained alternative shape**: when an etymon already extracted is followed by an alternative form introduced by a hedge (`plutôt`, `ou plutôt`, `ou peut-être`, `ou`) without restating the language, extract the alternative as a separate etymology with `language: null`. Set `hedge` to the connecting hedge word and capture etymon and gloss as usual. Example: in `plutôt de *Buffare*, Se gonfler de mangeaille, que du grec...`, the *Buffare* form lacks an explicit language but is the leading candidate in a chained pair where Du Méril is weighing alternatives.
+- **Compound shape**: `(de l'|du |en )<lang> *<A>* et *<B>*` where both forms together are the etymological source — e.g. `de l'islandais *Hol* et *Land*`. Both forms extract as separate etymon entries, both with the same `language`. Distinguish from the disjunctive `*A* ou *B*` shape (alternatives, one etymon extracts).
 
 ## What does NOT count as an etymology
 
@@ -149,7 +151,11 @@ If you cannot identify a field with structural certainty, return `null` for that
 - **Preserved-in claims**: `dans l'<lang> *X*`, `s'est conservé dans l'<lang> *X*`. These are derivative forms, not sources. Do not extract.
 - **Headword-meaning shape**: `ce mot signifiait en <lang> Y`, `<headword> signifiait en <lang> Y`. The text on the left is "this word"/the headword, not an italic form being glossed — Du Méril is reporting what the headword used to mean, not its etymology. Do not extract. (Distinguishing tell: real inverse shape has `*<italic_form>*` immediately before `signifiait`; headword-meaning has bare `ce mot` or a non-italic phrase.)
 - **Morphological-category captures**: `du verbe *X*`, `du substantif *X*`, `du diminutif *X*`. The etymological language was upstream in the sentence; without it the form is not an extractable etymon. Do not extract.
-- **Chained/elided second etymons**: when `du latin *A*, ou *B*` appears, only `*A*` extracts cleanly. The second form elides the language and stays unextracted, in the body for downstream review.
+- **Bare italic forms with no etymological framing.** An italic noun in body prose (`*Pasteur*`, `*Cellier*`, `*paitre*`) is not by itself an etymon. The chained-alternative shape above is the only path by which a `language: null` etymon legitimately enters the output; outside that shape, an italic form without an etymological preposition or hedge is body-text, not extraction.
+
+## Scholar attribution overlap with citations
+
+Some etymologies carry a scholarly attribution that also looks like a citation (e.g. `du latin *Pastor*, suivant Roquefort, t. ii, p. 314`). When the attributed scholar carries a locator, **extract twice**: once as `etymology.attribution` (with the etymon and language), once as a separate citation entry (with `author: "Roquefort"`, `work: null`, `locator: "t. ii, p. 314"`). The two extractions are independent and serve different downstream queries. If the attributed scholar has no locator (`auquel le rattache Borel`), set `attribution: "Borel"` on the etymology and emit nothing in citations.
 
 ## What counts as a citation
 
@@ -191,7 +197,7 @@ The bold incipit goes nowhere in the citation output — it belongs to the quota
 
 ## What does NOT count as a citation
 
-- Mid-prose mentions of scholars without a `Title, locator` structure (e.g. "Roquefort prétend...", "selon Borel"). Those are references, not citations.
+- Mid-prose scholar mentions without a locator (e.g. "Roquefort prétend...", "selon Borel"). Those are references, not citations. **However**, if a locator IS present without a work title (e.g. "suivant Roquefort, t. ii, p. 314"), extract the citation with `work: null` — the locator carries enough structural signal to count, and Du Méril's reader is expected to infer the work.
 - Mentions of works without a locator (e.g. "comme dans le *Roman de Rou*" with no page/verse). Edge case; if the locator is genuinely absent, set `locator: null` but the citation still extracts.
 - Du Méril's own headword being italicized (which is not a work title).
 
@@ -209,7 +215,7 @@ Italic phrases in body prose that are neither etymons, cognates, citation work t
 
 - **`locution`**: italic multi-word phrases the entry is glossing as a fixed expression. Typically the entry-leading construction (`*Se mettre à bondecul* signifie...`, `*Tomber en quenouille* veut dire...`) where Du Méril is defining the locution itself.
 
-- **`phrase`**: italic phrases attested from the world — place names (`*Rue des Seulles*`, `*Pont à la vieille*`), titles or designations (`*Sanctus Petrus de Vetula*`), fixed technical or proverbial usages — quoted to show the headword in context. Default when neither `variant` nor `locution` clearly applies.
+- **`phrase`**: phrases attested from the world — place names, titles or designations, fixed technical or proverbial usages — quoted to show the headword in context. Normally italicized (`*Rue des Seulles*`, `*Pont à la vieille*`, `*Sanctus Petrus de Vetula*`), but Du Méril omits italics on proper nouns introduced by an explicit historical-attestation framer; in that case the framer plus a capitalized form containing the headword is sufficient structural signal. Allowed framers: `on trouve dans de vieux actes`, `on lit dans <work>`, `dans une charte de`, `dans un acte de`, `mentionné dans`. Default when neither `variant` nor `locution` clearly applies.
 
 ## What does NOT count as an attestation
 
@@ -260,7 +266,7 @@ Berger, Pastre; dans quelques localités le s ne se prononce pas; du latin *Past
 }
 ```
 
-Note: Roquefort is mentioned with a locator but no work title is given inline, so `work: null`. This is a bare scholarly attribution with locator — borderline but extractable. (Du Méril's reader would know Roquefort = his *Glossaire*; we do not infer.)
+Note: Roquefort is mentioned with a locator (`t. ii, p. 314`) but no work title is given inline. Per the rule on bare-scholar-with-locator, this still extracts as a citation with `work: null` — the locator carries enough structural signal. (Du Méril's reader would know Roquefort = his *Glossaire*; we do not infer.)
 
 The line `*Pastis* signifiait Mur, Muraille` is **not** an etymology — it's headword-meaning shape (`ce mot signifie aussi`-style construction; here `*Pastis*` is being glossed as a synonym, not cited as an etymon). It's also not an attestation: `*Pastis*` is being defined, not attested in usage.
 
@@ -298,7 +304,9 @@ Grand mangeur; plutôt de *Buffare*, Se gonfler de mangeaille, que du grec <gr>�
 }
 ```
 
-Note: the first etymon has `language: null` because `de *Buffare*` lacks a language preposition — Du Méril doesn't say what language Buffare is from. Capture the etymon, mark language unknown.
+Note: the first etymon has `language: null` because it matches the **chained-alternative shape** — Du Méril writes `plutôt de *Buffare*, ... que du grec`, weighing two candidate sources. The first candidate lacks an explicit language preposition, but the hedge (`plutôt`) and the parallel construction with the second candidate make the etymological intent unambiguous. Capture the etymon, mark language null, set the hedge.
+
+This is the only path by which a `language: null` etymon enters the output. A bare italic noun in body prose without etymological framing is not extractable.
 
 ## Example 3 — anthology-wrapped citation with bold incipit
 
@@ -314,6 +322,8 @@ Devorent de leurs yeux vos substances, vos biens.
 Vaspaciens, c'or fuissies vos or vis
 [...several verse lines...]
 **La volenteis dont mes cuers est ravis**, dans Wackernagel, *Altfranzoesische Lieder*, p. 65.
+
+On dit aussi *Vaspasien*.
 ```
 
 **Output**:
@@ -446,6 +456,43 @@ Magasin pour les marchandises : il y avait autrefois à Caen une rue appelée la
 Note what does NOT appear in attestations:
 - `*Seulle*` (in `*Seulle* signifiait Cave`) — being glossed, not attested.
 - `*Cellier*` — derivationally related French word Du Méril mentions in passing, not an attestation of the headword.
+
+## Example 7 — etymology with attribution that also extracts as citation
+
+**Body**:
+```
+Du latin *Pastor*, suivant Roquefort, t. ii, p. 314; à comparer avec l'italien *Pastore*.
+```
+
+**Output**:
+```json
+{
+  "etymologies": [
+    {
+      "language": "latin",
+      "etymon": "Pastor",
+      "gloss": null,
+      "hedge": null,
+      "attribution": "Roquefort",
+      "surface_text": "Du latin *Pastor*, suivant Roquefort, t. ii, p. 314"
+    }
+  ],
+  "citations": [
+    {
+      "author": "Roquefort",
+      "work": null,
+      "editor": null,
+      "anthology": null,
+      "locator": "t. ii, p. 314",
+      "surface_text": "suivant Roquefort, t. ii, p. 314"
+    }
+  ],
+  "cross_references": [],
+  "attestations": []
+}
+```
+
+Note: Roquefort appears in both outputs — once as `etymology.attribution` (he's the scholar Du Méril credits for the Latin etymology), once as `citation.author` (he's cited with a locator). The dual extraction is intentional. The trailing `l'italien *Pastore*` is a cognate listing, not an etymon, and does not extract.
 
 # Final reminders
 
